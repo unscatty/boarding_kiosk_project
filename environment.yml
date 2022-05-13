@@ -1,0 +1,15 @@
+name: boarding_kiosk
+channels:
+  - pypi
+
+dependencies:
+  - python=3.9
+  - flask
+  - pip:
+    - azure-core
+    - azure-common
+    - azure-storage-blob
+    - azure-ai-formrecognizer
+    - azure-cognitiveservices-vision-computervision
+    - azure-cognitiveservices-vision-customvision
+    - azure-cognitiveservices-vision-face
