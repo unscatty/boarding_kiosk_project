@@ -8,8 +8,17 @@ __env_values = {
     'azure': {
         'form_recognizer': {
             'endpoint': os_getenv('AZURE_FORM_RECOGNIZER_ENDPOINT'),
-            'key': os_getenv('AZURE_FORM_RECOGNIZER_KEY')
-        }
+            'key': os_getenv('AZURE_FORM_RECOGNIZER_KEY'),
+            'training': {
+                'model_id': os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_ID'),
+                'model_name': os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_NAME'),
+                'training_data': {
+                    'url':os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_TRAIN_DATA_URL'),
+                    'subfolder': os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_TRAIN_DATA_SUBFOLDER')
+                }
+            }
+        },
+
     }
 }
 
