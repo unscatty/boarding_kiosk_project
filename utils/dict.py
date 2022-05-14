@@ -35,6 +35,4 @@ def __dict_fetch(dictionary: dict, key, to_dict=True, raises=False) -> dict:
     else:
         return {key: __dict.get(key)}
 
-
-def partial_dict(_dict: dict, schema, to_dict=True, raises=False) -> dict:
-    return __dict_fetch(_dict, schema, to_dict, raises)
+partial_dict = __dict_fetch
