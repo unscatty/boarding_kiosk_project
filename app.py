@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from services import form_recognizer
+from services.form_recognizer import kiosk_form_recognizer
 
 app = Flask(__name__)
 
@@ -12,7 +12,7 @@ def index():
 def recognize_id():
     content_url = request.args.get('url')
     
-    return jsonify(form_recognizer.get_identity(content_url))
+    return jsonify(kiosk_form_recognizer.extract_from_identity(content_url))
 
 
 app.run(debug=True)
