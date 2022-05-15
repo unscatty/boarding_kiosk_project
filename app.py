@@ -20,4 +20,14 @@ def  recognize_boarding_pass():
 
     return jsonify(kiosk_form_recognizer.extract_from_boarding_pass(boarding_pass_url))
 
+@app.route('/upload-video', methods=['POST'])
+def upload_video():
+    video = request.files['video']
+    video_bytes = video.stream.read()
+
+    with open(video.filename, 'wb') as video_file:
+        video_file.write(video_bytes)
+    
+    return jsonify({})
+
 app.run(debug=True)
