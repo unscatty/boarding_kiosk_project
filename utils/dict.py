@@ -18,6 +18,9 @@ def __dict_fetch(dictionary: dict, key, to_dict=True, raises=False) -> dict:
         if to_dict:
             if hasattr(__dict, 'to_dict'):
                 __dict = dictionary.to_dict()
+            elif isinstance(__dict, list):
+                # Transform list to dict
+                __dict = list_to_dict(dictionary)
             elif raises:
                 raise TypeError(
                     f'Object with key {key} is of type <{type(__dict)}>, and cannot be transformed to <dict>')
@@ -36,3 +39,6 @@ def __dict_fetch(dictionary: dict, key, to_dict=True, raises=False) -> dict:
         return {key: __dict.get(key)}
 
 partial_dict = __dict_fetch
+
+def list_to_dict(lst: list) -> dict:
+    return dict(enumerate(lst))
