@@ -28,10 +28,7 @@ def upload_video():
     video = request.files['video']
     video_bytes = video.stream.read()
 
-    with open(video.filename, 'wb') as video_file:
-        video_file.write(video_bytes)
-
-    video_upload_id = video_indexer.upload_to_video_indexer(video.filename, video_name=video.filename + str(datetime.now()))
+    video_upload_id = video_indexer.upload_stream_to_video_indexer(video_bytes, video_name=video.filename + str(datetime.now()))
     info = video_indexer.get_video_info(video_upload_id)
     
     # Already a dict
