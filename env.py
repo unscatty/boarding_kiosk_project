@@ -13,7 +13,7 @@ __env_values = {
                 'model_id': os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_ID'),
                 'model_name': os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_NAME'),
                 'training_data': {
-                    'url':os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_TRAIN_DATA_URL'),
+                    'url': os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_TRAIN_DATA_URL'),
                     'subfolder': os_getenv('AZURE_FORM_RECOGNIZER_CUSTOM_MODEL_TRAIN_DATA_SUBFOLDER')
                 }
             }
@@ -22,6 +22,10 @@ __env_values = {
             'subscription_key': os_getenv('AZURE_VIDEO_INDEXER_SUBSCRIPTION_KEY'),
             'location': os_getenv('AZURE_VIDEO_INDEXER_LOCATION'),
             'account_id': os_getenv('AZURE_VIDEO_INDEXER_ACCOUNT_ID')
+        },
+        'face_api': {
+            'endpoint': os_getenv('AZURE_FACE_API_ENDPOINT'),
+            'key': os_getenv('AZURE_FACE_API_KEY')
         }
     }
 }

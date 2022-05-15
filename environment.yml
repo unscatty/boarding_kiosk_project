@@ -6,6 +6,7 @@ dependencies:
   - python=3.9
   - flask
   - pip
+  - msrest
   - pip:
     - azure-core
     - azure-common
