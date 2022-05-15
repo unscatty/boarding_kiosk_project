@@ -14,5 +14,10 @@ def recognize_id():
     
     return jsonify(kiosk_form_recognizer.extract_from_identity(content_url))
 
+@app.route('/boarding-pass', methods=['GET'])
+def  recognize_boarding_pass():
+    boarding_pass_url = request.args.get('url')
+
+    return jsonify(kiosk_form_recognizer.extract_from_boarding_pass(boarding_pass_url))
 
 app.run(debug=True)
