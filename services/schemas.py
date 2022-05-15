@@ -1,7 +1,8 @@
 def __combine_common_properties(fields: list, field_properties: list) -> dict:
     return {field: field_properties for field in fields}
 
-__common_field_properties = ['value', 'confidence']
+
+__common_field_properties = ['name', 'value', 'confidence']
 
 __identity_fields = ['Address', 'FirstName', 'LastName', 'Sex', 'DateOfBirth']
 
@@ -29,4 +30,5 @@ __boarding_pass_fields = ['Airline Name',
                           'To',
                           'To Alt']
 
-BOARDING_PASS_SCHEMA = __combine_common_properties(__boarding_pass_fields, __common_field_properties)
+BOARDING_PASS_SCHEMA = __combine_common_properties(
+    __boarding_pass_fields, __common_field_properties)
