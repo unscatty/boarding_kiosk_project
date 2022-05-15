@@ -1,5 +1,8 @@
 from flask import Flask, request, jsonify
 from services.form_recognizer import kiosk_form_recognizer
+from services.video_indexer import video_indexer_client as video_indexer
+
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -27,7 +30,21 @@ def upload_video():
 
     with open(video.filename, 'wb') as video_file:
         video_file.write(video_bytes)
+
+    video_upload_id = video_indexer.upload_to_video_indexer(video.filename, video_name=video.filename + str(datetime.now()))
+    info = video_indexer.get_video_info(video_upload_id)
     
-    return jsonify({})
+    # Already a dict
+    return info
+
+@app.route('/video-indexing-status', methods=['GET'])
+def check_video_indexing_status():
+    video_process_id = request.args.get('video_id')
+
+    info = video_indexer.get_video_info(video_process_id)
+
+    # Already a dict
+    return info
+
 
 app.run(debug=True)

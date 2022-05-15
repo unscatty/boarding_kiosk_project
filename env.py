@@ -18,7 +18,11 @@ __env_values = {
                 }
             }
         },
-
+        'video_indexer': {
+            'subscription_key': os_getenv('AZURE_VIDEO_INDEXER_SUBSCRIPTION_KEY'),
+            'location': os_getenv('AZURE_VIDEO_INDEXER_LOCATION'),
+            'account_id': os_getenv('AZURE_VIDEO_INDEXER_ACCOUNT_ID')
+        }
     }
 }
 
