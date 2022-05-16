@@ -3,6 +3,7 @@ from uuid import uuid4
 from time import sleep
 from azure.cognitiveservices.vision.face import FaceClient
 from azure.cognitiveservices.vision.face.models import TrainingStatusType
+from azure.cognitiveservices.vision.face.models._models_py3 import APIErrorException
 from msrest.authentication import CognitiveServicesCredentials
 
 from env import ENV
@@ -17,11 +18,26 @@ face_client = FaceClient(__face_api_config.endpoint,
 
 def build_person_group_from_streams(
         stream_images,
-        client: FaceClient = face_client,
-        person_group_id=str(uuid4()),
-        person_group_name='random_person_group' + str(uuid4()),
-        person_group_person_name='random_person'+str(uuid4())):
-    client.person_group.create(person_group_id, person_group_name)
+        person_group_id,
+        person_group_name=None,
+        person_group_person_name=None,
+        client: FaceClient = face_client):
+
+    if not person_group_name:
+        person_group_name = person_group_id + '-person-group'
+
+    if not person_group_person_name:
+        person_group_person_name = person_group_name + str(uuid4())
+
+    # Create new person group
+    try:
+        client.person_group.create(person_group_id, person_group_name)
+    except APIErrorException as api_exception:
+        # Return if person group is already created
+        if api_exception.error.error.code == 'PersonGroupExists':
+            return person_group_id
+        else:
+            raise api_exception
 
     face_person = client.person_group_person.create(
         person_group_id, person_group_person_name)
@@ -87,7 +103,7 @@ def identify_from_video_group(detected_faces_ids: list,
 
     # Create group person from thumbnails in video
     person_group_id = build_person_group_from_streams(
-        thumbnail_image_streams, face_client)
+        thumbnail_image_streams, person_group_id=video_id + '_group_id')
 
     # Identify based on detected faces
     identification_result = identity_face_from_person_group(
