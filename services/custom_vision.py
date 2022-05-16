@@ -14,14 +14,15 @@ custom_project_config = custom_vision_config.custom_project
 prediction_threshold = custom_project_config.prediction_threshold
 
 
-def detect_with_stream(stream_image, threshold=prediction_threshold):
+def detect_with_stream(stream_image, threshold=prediction_threshold, predictor: CustomVisionPredictionClient = predictor):
+    # Detect objects using custom trained model
     results = predictor.detect_image(project_id=custom_project_config.project_id,
                                      published_name=custom_project_config.iteration_name, image_data=stream_image)
 
     return __filter_predictions(results.predictions, threshold)
 
 
-def detect_with_url(url: str, threshold=prediction_threshold):
+def detect_with_url(url: str, threshold=prediction_threshold, predictor: CustomVisionPredictionClient = predictor):
     results = predictor.detect_image_url(
         project_id=custom_project_config.project_id, published_name=custom_project_config.iteration_name, image_data=url)
 

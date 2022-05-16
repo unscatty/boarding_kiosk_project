@@ -46,7 +46,17 @@ __env_values = {
                 'tags': [tag.strip() for tag in os_getenv('AZURE_CUSTOM_VISION_PROJECT_TAGS').split(',')],
                 'prediction_threshold': float(os_getenv('AZURE_CUSTOM_VISION_PROJECT_PREDICTION_THRESHOLD'))
             }
+        },
+        'blob_storage': {
+            'account_url': os_getenv('AZURE_BLOB_STORAGE_ACCOUNT_URL'),
+            'sas_token': os_getenv('AZURE_BLOB_STORAGE_SAS_TOKEN'),
+            'container_name': os_getenv('AZURE_BLOB_STORAGE_CONTAINER_NAME'),
         }
+    },
+    'flight_manifest': {
+        'file_name': os_getenv('FLIGHT_MANIFEST_FILE_NAME'),
+        'delimiter': os_getenv('FLIGHT_MANIFEST_FILE_DELIMITER'),
+        'date_format': os_getenv('FLIGHT_MANIFEST_FILE_DATE_FORMAT')
     }
 }
 
