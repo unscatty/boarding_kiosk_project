@@ -43,7 +43,8 @@ __env_values = {
                 'iteration_id': os_getenv('AZURE_CUSTOM_VISION_PROJECT_ITERATION_ID'),
                 'iteration_name': os_getenv('AZURE_CUSTOM_VISION_PROJECT_ITERATION_NAME'),
                 # Get every tag separated by a comma
-                'tags': [tag.strip() for tag in os_getenv('AZURE_CUSTOM_VISION_PROJECT_TAGS').split(',')]
+                'tags': [tag.strip() for tag in os_getenv('AZURE_CUSTOM_VISION_PROJECT_TAGS').split(',')],
+                'prediction_threshold': float(os_getenv('AZURE_CUSTOM_VISION_PROJECT_PREDICTION_THRESHOLD'))
             }
         }
     }

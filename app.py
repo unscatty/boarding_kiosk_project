@@ -3,8 +3,9 @@ from services.form_recognizer import kiosk_form_recognizer
 from services import video_indexer as video_indexer_service
 from services.video_indexer import video_indexer_client
 from services import face as face_service
+from services import custom_vision as custom_vision_service
 
-from utils.dict import partial_dict
+from utils.dict import partial_dict, to_dict
 
 from datetime import datetime
 
@@ -58,12 +59,19 @@ def video_analysis():
 @app.route('/detect-identity', methods=['POST'])
 def detected_from_id_document():
     video_id = request.args.get('video_id')
-    id_document = request.files['id_document']
-    id_document_stream = id_document.stream
+    id_document_stream = request.files['id_document'].stream
 
     identification_result = face_service.identify_from_video_group_using_stream(id_document_stream, video_id)
 
-    return partial_dict(identification_result, ['candidates'])
+    return jsonify(partial_dict(to_dict(identification_result), ['candidates']))
+
+@app.route('/validate-baggage', methods=['POST'])
+def validate_baggage():
+    baggage_image = request.files['baggage'].stream
+
+    prediction_results = custom_vision_service.detect_with_stream(baggage_image)
+
+    return jsonify(partial_dict(to_dict(prediction_results), ['probability', 'tag_type']))
 
 if __name__ == '__main__':
     app.run()
