@@ -26,6 +26,25 @@ __env_values = {
         'face_api': {
             'endpoint': os_getenv('AZURE_FACE_API_ENDPOINT'),
             'key': os_getenv('AZURE_FACE_API_KEY')
+        },
+        'custom_vision': {
+            'training': {
+                'endpoint': os_getenv('AZURE_CUSTOM_VISION_TRAINING_ENDPOINT'),
+                'key': os_getenv('AZURE_CUSTOM_VISION_TRAINING_KEY'),
+            },
+            'prediction': {
+                'endpoint': os_getenv('AZURE_CUSTOM_VISION_PREDICTION_ENDPOINT'),
+                'key': os_getenv('AZURE_CUSTOM_VISION_PREDICTION_KEY'),
+                'resource_id': os_getenv('AZURE_CUSTOM_VISION_PREDICTION_RESOURCE_ID')
+            },
+            'custom_project': {
+                'name': os_getenv('AZURE_CUSTOM_VISION_PROJECT_NAME'),
+                'project_id': os_getenv('AZURE_CUSTOM_VISION_PROJECT_ID'),
+                'iteration_id': os_getenv('AZURE_CUSTOM_VISION_PROJECT_ITERATION_ID'),
+                'iteration_name': os_getenv('AZURE_CUSTOM_VISION_PROJECT_ITERATION_NAME'),
+                # Get every tag separated by a comma
+                'tags': [tag.strip() for tag in os_getenv('AZURE_CUSTOM_VISION_PROJECT_TAGS').split(',')]
+            }
         }
     }
 }
