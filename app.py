@@ -11,11 +11,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    return jsonify({'name': 'alice', 'email': 'alice@gmail.com'})
-
-
 @app.route('/identity', methods=['GET'])
 def recognize_id():
     content_url = request.args.get('url')
@@ -27,6 +22,12 @@ def  recognize_boarding_pass():
     boarding_pass_url = request.args.get('url')
 
     return jsonify(kiosk_form_recognizer.extract_from_boarding_pass(boarding_pass_url))
+
+@app.route('/boarding-pass-file', methods=['POST'])
+def recognize_boarding_pass_from_file():
+    boarding_pass_file = request.files['boarding_pass'].stream
+
+    return jsonify(kiosk_form_recognizer.extract_from_boarding_pass_file(boarding_pass_file))
 
 @app.route('/upload-video', methods=['POST'])
 def upload_video():
