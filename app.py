@@ -4,6 +4,8 @@ from services import video_indexer as video_indexer_service
 from services.video_indexer import video_indexer_client
 from services import face as face_service
 from services import custom_vision as custom_vision_service
+from services import validation as validation_service
+from services.flight_manifest import flight_manifest as flight_manifest_service
 
 from utils.dict import partial_dict, to_dict
 
@@ -27,7 +29,14 @@ def  recognize_boarding_pass():
 def recognize_boarding_pass_from_file():
     boarding_pass_file = request.files['boarding_pass'].stream
 
-    return jsonify(kiosk_form_recognizer.extract_from_boarding_pass_file(boarding_pass_file))
+    is_valid, response = validation_service.validate_boarding_pass(boarding_pass_file, flight_manifest_service)
+
+    if is_valid:
+        return response, 200
+    else:
+        return {'error': response}, 478
+
+    # return jsonify(kiosk_form_recognizer.extract_from_boarding_pass_file(boarding_pass_file))
 
 @app.route('/upload-video', methods=['POST'])
 def upload_video():

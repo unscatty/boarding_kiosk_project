@@ -25,7 +25,9 @@ class FlightManifest:
     def find(self, key, value):
         return next((row for row in self.as_list() if row.get(key) == value))
 
-    def upload(self, data: list, file_name=None):
+    def upload(self, file_name=None, overwrite=True):
+        data = self.as_list()
+
         if not file_name:
             file_name = self.file_name
 
@@ -37,7 +39,7 @@ class FlightManifest:
         writer.writeheader()
         writer.writerows(data)
 
-        self.blob_client.upload_blob(csv_stream.getvalue(), overwrite=True)
+        self.blob_client.upload_blob(csv_stream.getvalue(), overwrite=overwrite)
 
 
 blob_service_client = BlobServiceClient(account_url=__blob_storage_config.account_url,
@@ -45,3 +47,9 @@ blob_service_client = BlobServiceClient(account_url=__blob_storage_config.accoun
 
 flight_manifest = FlightManifest(
     blob_service_client, container_name=__blob_storage_config.container_name, file_name=ENV.flight_manifest.file_name, file_delimiter=ENV.flight_manifest.delimiter)
+
+if __name__ == '__main__':
+    rows = flight_manifest.as_list()
+
+    for row in rows:
+        print(row)

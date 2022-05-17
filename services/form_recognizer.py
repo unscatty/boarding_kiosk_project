@@ -22,6 +22,13 @@ class KioskFormRecognizer:
         result_content = extraction_process.result()
         
         return [recognized_form_to_dict(result.fields, schema) for result in result_content]
+    
+    def extract_from_boarding_pass_file(self, boarding_pass_file, schema=BOARDING_PASS_SCHEMA) -> dict:
+        extraction_process = self.form_recognizer_client.begin_recognize_custom_forms(
+            model_id=self.boarding_pass_model_id, form=boarding_pass_file)
+        result_content = extraction_process.result()
+        
+        return [recognized_form_to_dict(result.fields, schema) for result in result_content]
 
 
 __form_recognizer_config = ENV.azure.form_recognizer
