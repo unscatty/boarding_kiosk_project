@@ -17,6 +17,13 @@ class KioskFormRecognizer:
 
         return [recognized_form_to_dict(result.fields, schema) for result in id_content]
 
+    def extract_from_identity_file(self, indentity_file, schema=IDENTITY_SCHEMA)->dict:
+        id_content_from_file = self.form_recognizer_client.begin_recognize_identity_documents(indentity_file)
+
+        id_content = id_content_from_file.result()
+
+        return [recognized_form_to_dict(result.fields, schema) for result in id_content]
+
     def extract_from_boarding_pass(self, boarding_pass_url: str, schema=BOARDING_PASS_SCHEMA) -> dict:
         extraction_process = self.form_recognizer_client.begin_recognize_custom_forms_from_url(model_id=self.boarding_pass_model_id, form_url=boarding_pass_url)
         result_content = extraction_process.result()

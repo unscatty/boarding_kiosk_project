@@ -13,23 +13,41 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+
 @app.route('/identity', methods=['GET'])
 def recognize_id():
     content_url = request.args.get('url')
-    
+
     return jsonify(kiosk_form_recognizer.extract_from_identity(content_url))
 
+
+@app.route('/identity-file', methods=['POST'])
+def recognize_id_file():
+    id_document_file = request.files['id_document'].stream
+
+    is_valid, response = validation_service.validate_identity_document(id_document_file, flight_manifest_service)
+
+    if is_valid:
+        return response, 200
+    else:
+        return {'error': response}, 478
+
+    # return jsonify(kiosk_form_recognizer.extract_from_identity_file(id_document_file))
+
+
 @app.route('/boarding-pass', methods=['GET'])
-def  recognize_boarding_pass():
+def recognize_boarding_pass():
     boarding_pass_url = request.args.get('url')
 
     return jsonify(kiosk_form_recognizer.extract_from_boarding_pass(boarding_pass_url))
+
 
 @app.route('/boarding-pass-file', methods=['POST'])
 def recognize_boarding_pass_from_file():
     boarding_pass_file = request.files['boarding_pass'].stream
 
-    is_valid, response = validation_service.validate_boarding_pass(boarding_pass_file, flight_manifest_service)
+    is_valid, response = validation_service.validate_boarding_pass(
+        boarding_pass_file, flight_manifest_service)
 
     if is_valid:
         return response, 200
@@ -38,16 +56,19 @@ def recognize_boarding_pass_from_file():
 
     # return jsonify(kiosk_form_recognizer.extract_from_boarding_pass_file(boarding_pass_file))
 
+
 @app.route('/upload-video', methods=['POST'])
 def upload_video():
     video = request.files['video']
     video_bytes = video.stream.read()
 
-    video_upload_id = video_indexer_client.upload_stream_to_video_indexer(video_bytes, video_name=video.filename + str(datetime.now()))
+    video_upload_id = video_indexer_client.upload_stream_to_video_indexer(
+        video_bytes, video_name=video.filename + str(datetime.now()))
     info = video_indexer_client.get_video_info(video_upload_id)
-    
+
     # Already a dict
     return info
+
 
 @app.route('/video-indexing-status', methods=['GET'])
 def check_video_indexing_status():
@@ -58,6 +79,7 @@ def check_video_indexing_status():
     # Already a dict
     return info
 
+
 @app.route('/video-analysis', methods=['GET'])
 def video_analysis():
     video_id = request.args.get('video_id')
@@ -66,22 +88,27 @@ def video_analysis():
 
     return analysis
 
+
 @app.route('/detect-identity', methods=['POST'])
 def detected_from_id_document():
     video_id = request.args.get('video_id')
     id_document_stream = request.files['id_document'].stream
 
-    identification_result = face_service.identify_from_video_group_using_stream(id_document_stream, video_id)
+    identification_result = face_service.identify_from_video_group_using_stream(
+        id_document_stream, video_id)
 
     return jsonify(partial_dict(to_dict(identification_result), ['candidates']))
+
 
 @app.route('/validate-baggage', methods=['POST'])
 def validate_baggage():
     baggage_image = request.files['baggage'].stream
 
-    prediction_results = custom_vision_service.detect_with_stream(baggage_image)
+    prediction_results = custom_vision_service.detect_with_stream(
+        baggage_image)
 
     return jsonify(partial_dict(to_dict(prediction_results), ['probability', 'tag_type']))
+
 
 if __name__ == '__main__':
     app.run()
