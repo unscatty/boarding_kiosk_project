@@ -13,6 +13,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+global flight_manifest_row
+flight_manifest_row = {}
+
 
 @app.route('/identity', methods=['GET'])
 def recognize_id():
@@ -25,7 +28,8 @@ def recognize_id():
 def recognize_id_file():
     id_document_file = request.files['id_document'].stream
 
-    is_valid, response = validation_service.validate_identity_document(id_document_file, flight_manifest_service)
+    is_valid, response, row = validation_service.validate_identity_document(
+        id_document_file, flight_manifest_row, flight_manifest_service)
 
     if is_valid:
         return response, 200
@@ -46,8 +50,11 @@ def recognize_boarding_pass():
 def recognize_boarding_pass_from_file():
     boarding_pass_file = request.files['boarding_pass'].stream
 
-    is_valid, response = validation_service.validate_boarding_pass(
+    is_valid, response, row = validation_service.validate_boarding_pass(
         boarding_pass_file, flight_manifest_service)
+
+    global flight_manifest_row
+    flight_manifest_row = row
 
     if is_valid:
         return response, 200
@@ -94,11 +101,12 @@ def detected_from_id_document():
     video_id = request.args.get('video_id')
     id_document_stream = request.files['id_document'].stream
 
-    identification_result = face_service.identify_from_video_group_using_stream(
-        id_document_stream, video_id)
+    is_valid, response, row = validation_service.validate_identity_from_video(id_document_stream, video_id, None)
 
-    return jsonify(partial_dict(to_dict(identification_result), ['candidates']))
-
+    if is_valid:
+        return response, 200
+    else:
+        return {'error': response}, 478
 
 @app.route('/validate-baggage', methods=['POST'])
 def validate_baggage():
