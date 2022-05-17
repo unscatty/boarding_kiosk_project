@@ -101,12 +101,14 @@ def detected_from_id_document():
     video_id = request.args.get('video_id')
     id_document_stream = request.files['id_document'].stream
 
-    is_valid, response, row = validation_service.validate_identity_from_video(id_document_stream, video_id, None)
+    is_valid, response, row = validation_service.validate_identity_from_video(
+        id_document_stream, video_id, None)
 
     if is_valid:
         return response, 200
     else:
         return {'error': response}, 478
+
 
 @app.route('/validate-baggage', methods=['POST'])
 def validate_baggage():
@@ -116,6 +118,23 @@ def validate_baggage():
         baggage_image)
 
     return jsonify(partial_dict(to_dict(prediction_results), ['probability', 'tag_type']))
+
+
+@app.route('/validate', methods=['POST'])
+def validate_boarding():
+    boarding_pass_file = request.files['boarding_pass']
+    identity_doc_file = request.files['id_document']
+    luggage_image_file = request.files['luggage']
+
+    video_id = request.args.get('video_id')
+
+    if not (boarding_pass_file and identity_doc_file and luggage_image_file and video_id):
+        return {'error': 'You are missing required files'}, 400
+
+    return validation_service.validate_boarding(boarding_pass_file=boarding_pass_file.stream,
+                                                identity_doc_file=identity_doc_file.stream,
+                                                luggage_image_file=luggage_image_file.stream,
+                                                video_id=video_id, flight_manifest_service=flight_manifest_service)
 
 
 if __name__ == '__main__':

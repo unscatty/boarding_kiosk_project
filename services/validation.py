@@ -80,9 +80,9 @@ def validate_identity_document(identity_doc_file,
     extracted_data = form_recognizer_service.extract_from_identity_file(
         identity_doc_file)
 
-    if len(extracted_data) != 1:
-        # More than one documents
-        return False, 'Service detected more than one identity documents'
+    # if len(extracted_data) != 1:
+    #     # More than one documents
+    #     return False, 'Service detected more than one identity documents'
 
     id_document_data = extracted_data[0]
 
@@ -144,3 +144,49 @@ def validate_identity_from_video(identity_doc_file, video_id, flight_manifest_ro
         flight_manifest_service.upload()
 
     return True, result, flight_manifest_row
+
+
+def __create_response(valid: bool, response, *_):
+    return {'valid': valid, 'response': response}
+
+# Perform full validation with all documents
+
+
+def validate_boarding(boarding_pass_file,
+                      identity_doc_file,
+                      luggage_image_file,
+                      video_id,
+                      flight_manifest_service: FlightManifest = flight_manifest_service):
+    # Server response
+    validation_response = {}
+
+    # Perform boarding pass validation
+    bpass_valid, bpass_response, manifest_row = validate_boarding_pass(
+        boarding_pass_file=boarding_pass_file, flight_manifest_service=flight_manifest_service)
+
+    validation_response['boarding_pass'] = __create_response(
+        bpass_valid, bpass_response)
+
+    if not bpass_valid:
+        # Validation cannot continue
+        # Must pass boarding pass validation in order to continue
+        # because boarding pass id is used to identify CSV row in flight manifest
+        return validation_response
+
+    # Validate id document
+    validation_response['id_document'] = __create_response(*validate_identity_document(
+        identity_doc_file=identity_doc_file, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
+
+    # Validate luggage
+    validation_response['luggage'] = __create_response(*validate_luggage(
+        luggage_image_file=luggage_image_file, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
+
+
+    # Reset id document image steram
+    identity_doc_file.seek(0)
+
+    # Validate identity from video
+    validation_response['identity'] = __create_response(*validate_identity_from_video(
+        identity_doc_file=identity_doc_file, video_id=video_id, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
+
+    return validation_response
