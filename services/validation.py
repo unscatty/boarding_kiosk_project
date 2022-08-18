@@ -19,7 +19,7 @@ boarding_pass_validation_schema = {
     'To': 'to',
     # Date extracted from boarding pass is wrong, use alternate field value instead
     'Date': 'dateAlt',
-    'Baggage': 'baggage',
+    # 'Baggage': 'baggage',
     'Seat': 'seat',
     'Gate': 'gate',
     'BoardingTime': 'boardingTime',
@@ -37,7 +37,7 @@ def validate_boarding_pass(boarding_pass_file,
 
     if len(extracted_data) != 1:
         # More than one documents
-        return False, 'Service detected more than one boarding pass documents'
+        return False, 'Service detected more than one boarding pass documents', None
 
     boarding_pass_data = extracted_data[0]
 
@@ -46,7 +46,7 @@ def validate_boarding_pass(boarding_pass_file,
         flight_manifest_row = flight_manifest_service.find(
             key=find_by_property, value=boarding_pass_data.get(validation_schema[find_by_property]).get('value'))
     except StopIteration:
-        return False, 'Could not find your boarding pass information in flight manifest'
+        return False, 'Could not find your boarding pass information in flight manifest', None
 
     # Validate each field with its corresponding column in flight manifest
     for flight_manifest_key, boarding_pass_key in validation_schema.items():
@@ -59,10 +59,12 @@ def validate_boarding_pass(boarding_pass_file,
         if flight_manifest_key == 'Class':
             flight_manifest_value = flight_manifest_value[0].upper()
 
+        print(f'Flight manifest[{flight_manifest_key}:{flight_manifest_value} - Boarding pass[{boarding_pass_key}:{boarding_pass_value}]')
+
         if flight_manifest_value.strip() != boarding_pass_value.strip():
             return False, (f'Field "{flight_manifest_key}" with value "{flight_manifest_value}"'
                            ' from flight manifest did not match '
-                           f'"{boarding_pass_key}" with value "{boarding_pass_value}" from boarding pass')
+                           f'"{boarding_pass_key}" with value "{boarding_pass_value}" from boarding pass'), None
 
     # Change flight manifest
     flight_manifest_row[validation_column] = str(True).upper()
@@ -80,9 +82,7 @@ def validate_identity_document(identity_doc_file,
     extracted_data = form_recognizer_service.extract_from_identity_file(
         identity_doc_file)
 
-    # if len(extracted_data) != 1:
-    #     # More than one documents
-    #     return False, 'Service detected more than one identity documents'
+    # Print to the terminal for debugging purposes
 
     id_document_data = extracted_data[0]
 
@@ -111,7 +111,7 @@ def validate_identity_document(identity_doc_file,
         return True, id_document_data, flight_manifest_row
 
     # Couldn't get info from flight manifest
-    return False, 'Your identification data could not be found in flight manifest'
+    return False, 'Your identification data could not be found in flight manifest', None
 
 
 def validate_luggage(luggage_image_file, flight_manifest_row, flight_manifest_service: FlightManifest = flight_manifest_service):
@@ -119,7 +119,7 @@ def validate_luggage(luggage_image_file, flight_manifest_row, flight_manifest_se
 
     if len(predictions) > 0:
         # Lighter has been detected
-        return False, 'A lighter has been detected'
+        return False, 'A lighter has been detected', None
 
     # Update flight manifest
     flight_manifest_row['LuggageValidation'] = str(True).upper()
@@ -129,6 +129,9 @@ def validate_luggage(luggage_image_file, flight_manifest_row, flight_manifest_se
 
 
 def validate_identity_from_video(identity_doc_file, video_id, flight_manifest_row, flight_manifest_service: FlightManifest = flight_manifest_service):
+    if not video_id:
+        return False, 'Identity could not be verified', None
+
     identification_result = face_service.identify_from_video_group_using_stream(
         identity_doc_file, video_id)
 
@@ -136,7 +139,7 @@ def validate_identity_from_video(identity_doc_file, video_id, flight_manifest_ro
 
     # Identity could not be verified
     if len(result['candidates']) < 1:
-        return False, 'Identity could not be verified'
+        return False, 'Identity could not be verified', None
 
     if flight_manifest_row:
         # Update flight manifest
@@ -164,7 +167,7 @@ def validate_boarding(boarding_pass_file,
     bpass_valid, bpass_response, manifest_row = validate_boarding_pass(
         boarding_pass_file=boarding_pass_file, flight_manifest_service=flight_manifest_service)
 
-    validation_response['boarding_pass'] = __create_response(
+    validation_response['boardingPass'] = __create_response(
         bpass_valid, bpass_response)
 
     if not bpass_valid:
@@ -174,19 +177,20 @@ def validate_boarding(boarding_pass_file,
         return validation_response
 
     # Validate id document
-    validation_response['id_document'] = __create_response(*validate_identity_document(
+    validation_response['idDocument'] = __create_response(*validate_identity_document(
         identity_doc_file=identity_doc_file, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
 
     # Validate luggage
-    validation_response['luggage'] = __create_response(*validate_luggage(
-        luggage_image_file=luggage_image_file, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
-
+    if luggage_image_file:
+        validation_response['luggage'] = __create_response(*validate_luggage(
+            luggage_image_file=luggage_image_file, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
 
     # Reset id document image steram
     identity_doc_file.seek(0)
 
     # Validate identity from video
-    validation_response['identity'] = __create_response(*validate_identity_from_video(
-        identity_doc_file=identity_doc_file, video_id=video_id, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
+    if video_id:
+        validation_response['identity'] = __create_response(*validate_identity_from_video(
+            identity_doc_file=identity_doc_file, video_id=video_id, flight_manifest_row=manifest_row, flight_manifest_service=flight_manifest_service))
 
     return validation_response

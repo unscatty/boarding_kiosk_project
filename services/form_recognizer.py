@@ -9,7 +9,7 @@ class KioskFormRecognizer:
         self.form_recognizer_client = FormRecognizerClient(endpoint, AzureKeyCredential(key))
         self.boarding_pass_model_id = custom_boarding_pass_model_id
 
-    def extract_from_identity(self, identity_url: str, schema=IDENTITY_SCHEMA) -> dict:
+    def extract_from_identity(self, identity_url: str, schema=IDENTITY_SCHEMA) -> list:
         id_content_from_url = self.form_recognizer_client.begin_recognize_identity_documents_from_url(
             identity_url)
 
@@ -17,7 +17,7 @@ class KioskFormRecognizer:
 
         return [recognized_form_to_dict(result.fields, schema) for result in id_content]
 
-    def extract_from_identity_file(self, indentity_file, schema=IDENTITY_SCHEMA)->dict:
+    def extract_from_identity_file(self, indentity_file, schema=IDENTITY_SCHEMA) -> dict:
         id_content_from_file = self.form_recognizer_client.begin_recognize_identity_documents(indentity_file)
 
         id_content = id_content_from_file.result()
