@@ -131,7 +131,7 @@ def validate_baggage():
 
     return jsonify(partial_dict(to_dict(prediction_results), ['probability', 'tag_type']))
 
-
+# Performs full validation process taking ID card, video id (from previously uploaded video), boarding pass file and luggage image file
 @app.route('/validate', methods=['POST'])
 def validate_boarding():
     boarding_pass_file = request.files.get('boarding_pass')

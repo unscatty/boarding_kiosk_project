@@ -48,6 +48,7 @@ def build_person_group_from_streams(
 
     client.person_group.train(person_group_id)
 
+    # Train the person group
     while (True):
         training_status = client.person_group.get_training_status(
             person_group_id)
